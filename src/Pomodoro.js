@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Timer from './Timer';
+import './Pomodoro.css';
 
 export default class Pomodoro extends Component {
   constructor(props) {
@@ -62,7 +63,6 @@ export default class Pomodoro extends Component {
     // 1. countDown is called every second so every time it must
     // 2. check that timer > 0, if so then decrement and set new value of timer
     if (this.state.timer > 0) {
-      // let timerValue = this.state.timer - 1;
       this.setState({
         timer: this.state.timer - 1
       });
@@ -83,7 +83,7 @@ export default class Pomodoro extends Component {
     // Start text should be conditional and change to resume when it has been paused
 
     return (
-      <div>
+      <div className="pomodoro">
         <section className="section-timer" >
           <Timer timer={ this.state.timer }/>
         </section>

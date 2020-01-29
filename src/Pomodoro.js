@@ -10,7 +10,7 @@ export default class Pomodoro extends Component {
       onBreak: false,
       isActive: false,
       timerId: 0,
-      timer: 10,
+      timer: 1500,
       breakTimer: 300
     }
 
@@ -38,7 +38,8 @@ export default class Pomodoro extends Component {
   startTimer() {
   
     if (this.state.timer > 0 && !this.state.isActive) {
-      // && this.state.breakTimer > 0 - save this for when break activates
+      // 1. check if the alarm is active
+      this.toggleAlarm(false);
       this.setState({
         timerId: setInterval(this.countDown, 1000),
         isActive: true
@@ -48,6 +49,8 @@ export default class Pomodoro extends Component {
 
   // onClick Function that stops the timer countdown
   stopTimer() {
+    this.toggleAlarm(false);              // turns off the alarm if its active
+
     clearInterval(this.state.timerId);    // clear the Interval timer calls to countdown()
     this.setState({
       isActive: false                     // set isActive to false
@@ -64,7 +67,6 @@ export default class Pomodoro extends Component {
       
       clearInterval(this.state.timerId);  // clear the interval calls to countdown()
       this.setState({
-        onBreak: !this.state.onBreak,     // toggle break value to start break or indicate it's end
         isActive: false                   // set to inactive
       })
     }
@@ -72,23 +74,30 @@ export default class Pomodoro extends Component {
 
   // React Function that handles whenever the Component is updated
   componentDidUpdate() {
-    if (this.state.timer === 0 && !this.state.isActive) {  // check that timer has ended
-      const alarm = document.getElementById('alarm');
-      alarm.play();
-      // alarm.pause();
+    if (this.state.timer === 0 && !this.state.isActive) {     // check that timer has ended
+      this.toggleAlarm(true);
+
+      if (this.state.onBreak === false) {                     // if onBreak === false (end of normal timer)
+        this.setState({
+          onBreak: true,                                      // toggle onBreak value
+          timer: 300                                          // set Timer
+        });
+      }
     }  
+  }
+
+  // toggles the Alarm depending on several factors in state
+  toggleAlarm(play) {
+    const alarm = document.getElementById('alarm');
+    if (alarm)
+      play ? alarm.play() : alarm.pause();                                           // sound the alarm
   }
 
   render() {
     let breakNotice = "";
-    // Note this entire section is only needed when onBreak is true so possible reFactor
-    if (this.state.onBreak) {
-      let noticeMsg = "";
-      if (this.state.timer === 0) {           // if timer === 0      
-        noticeMsg = this.state.onBreak ? "The Timer has Ended" : "Time for a Break";
-      } else {                                // timer > 0
-        noticeMsg = "Break Time";
-      }  
+    
+    if (this.state.timer === 0 || this.state.onBreak) {
+      let noticeMsg = this.state.onBreak && this.state.timer === 0 ? "The Timer has Ended" : "Break Time"; 
 
       breakNotice = <section className="section-notice">
         <h3 className="section-notice-msg">{noticeMsg}</h3> 
@@ -106,7 +115,7 @@ export default class Pomodoro extends Component {
           <Timer timer={ this.state.timer }/>
         </section>
         
-        {this.state.onBreak ? breakNotice : ""}
+        {this.state.timer === 0 || this.state.onBreak ? breakNotice : ""}
         
         <section className="section-controls">
           <button className="controls-button" onClick={this.startTimer}>Start</button>

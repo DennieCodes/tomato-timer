@@ -10,7 +10,7 @@ export default class Pomodoro extends Component {
       onBreak: false,
       isActive: false,
       timerId: 0,
-      timer: 1500,
+      timer: 10,
       breakTimer: 300
     }
 
@@ -20,7 +20,7 @@ export default class Pomodoro extends Component {
     this.countDown = this.countDown.bind(this);
   }
 
-  // onClick Function that sets the timer value to 25 minutes, 00 seconds
+  // onClick Function that resets the timer value
   resetTimer() {
     if(this.state.timerId !== 0) {
       clearInterval(this.state.timerId);
@@ -36,11 +36,9 @@ export default class Pomodoro extends Component {
 
   // onClick Function that starts the timer countdown
   startTimer() {
-    // 1. Start button is pressed
-    // 2. Check that timer and breakTimer values are > 0, if not then do nothing otherwise
-    if (this.state.timer > 0 && this.state.breakTimer > 0) {
-      // 3. If so then set an Interval to call countdown and record interval Id.
-      // 4. Set state of the timerId to interval Id, set isActive to true
+  
+    if (this.state.timer > 0 && !this.state.isActive) {
+      // && this.state.breakTimer > 0 - save this for when break activates
       this.setState({
         timerId: setInterval(this.countDown, 1000),
         isActive: true
@@ -50,43 +48,65 @@ export default class Pomodoro extends Component {
 
   // onClick Function that stops the timer countdown
   stopTimer() {
-    // 1. Clear the interval timer
-    clearInterval(this.state.timerId);
-    // 2. set isActive to false
+    clearInterval(this.state.timerId);    // clear the Interval timer calls to countdown()
     this.setState({
-      isActive: false
+      isActive: false                     // set isActive to false
     });
   }
 
   // Function that handles the logic of the timer countdown
   countDown() {
-    // 1. countDown is called every second so every time it must
-    // 2. check that timer > 0, if so then decrement and set new value of timer
-    if (this.state.timer > 0) {
+    if (this.state.timer > 0) {           // check that there is still time on the timer
       this.setState({
-        timer: this.state.timer - 1
+        timer: this.state.timer - 1       // decrement the value of timer
       });
-    } else {
-      // 3. if timer === 0, then sound the alarm
-      alert('Timer is done!');
-      // 4. Clear the interval
-      clearInterval(this.state.timerId);
-      // 5. Set onBreak to true, isActive to false
+    } else {                              // execute if the timer has completed
+      
+      clearInterval(this.state.timerId);  // clear the interval calls to countdown()
       this.setState({
-        onBreak: true,
-        isActive: false
+        onBreak: !this.state.onBreak,     // toggle break value to start break or indicate it's end
+        isActive: false                   // set to inactive
       })
     }
   }
 
+  // React Function that handles whenever the Component is updated
+  componentDidUpdate() {
+    if (this.state.timer === 0 && !this.state.isActive) {  // check that timer has ended
+      const alarm = document.getElementById('alarm');
+      alarm.play();
+      // alarm.pause();
+    }  
+  }
+
   render() {
-    // Start text should be conditional and change to resume when it has been paused
+    let breakNotice = "";
+    // Note this entire section is only needed when onBreak is true so possible reFactor
+    if (this.state.onBreak) {
+      let noticeMsg = "";
+      if (this.state.timer === 0) {           // if timer === 0      
+        noticeMsg = this.state.onBreak ? "The Timer has Ended" : "Time for a Break";
+      } else {                                // timer > 0
+        noticeMsg = "Break Time";
+      }  
+
+      breakNotice = <section className="section-notice">
+        <h3 className="section-notice-msg">{noticeMsg}</h3> 
+        <audio id="alarm">
+          <source src="analog-watch-alarm.mp3" type="audio/mpeg"></source>
+          <source src="analog-watch-alarm.wav" type="audio/wav"></source>
+          Your browser does not support the audio element
+        </audio>
+      </section>;
+    }
 
     return (
       <div className="pomodoro">
         <section className="section-timer" >
           <Timer timer={ this.state.timer }/>
         </section>
+        
+        {this.state.onBreak ? breakNotice : ""}
         
         <section className="section-controls">
           <button className="controls-button" onClick={this.startTimer}>Start</button>

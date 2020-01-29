@@ -3,8 +3,10 @@ import './Timer.css';
 
 export default class Timer extends Component {
   render() {
-    let minutes = Math.trunc(this.props.timer / 60);
-    let seconds = this.props.timer % 60 === 0 ? "00" : this.props.timer % 60;
+    let minuteParse = Math.trunc(this.props.timer / 60);
+    let minutes = minuteParse < 10 ? `0${minuteParse}` : minuteParse;
+    let secondParse = this.props.timer % 60;
+    let seconds = secondParse < 10 ? `0${secondParse}` : secondParse;
 
     return (
       <div className="timer">

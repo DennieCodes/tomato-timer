@@ -18,6 +18,14 @@
   justify-content: space-between;
 }
 
+.section-notice {
+  width: 100%;
+  background-color: #07441F;
+  color: white;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
 .controls-button {
   font-size: 1.5rem;
   padding: 1rem;

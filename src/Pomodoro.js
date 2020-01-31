@@ -10,8 +10,9 @@ export default class Pomodoro extends Component {
       onBreak: false,
       isActive: false,
       timerId: 0,
-      timer: 1500,
-      breakTimer: 300
+      timer: this.props.timerLength,
+      timerLength: this.props.timerLength,
+      breakLength: this.props.breakLength
     }
 
     this.resetTimer = this.resetTimer.bind(this);
@@ -27,8 +28,7 @@ export default class Pomodoro extends Component {
     }
 
     this.setState({
-      timer: 1500,
-      breakTimer: 300,
+      timer: this.state.timerLength,
       isActive: false,
       onBreak: false
     });
@@ -80,7 +80,13 @@ export default class Pomodoro extends Component {
       if (this.state.onBreak === false) {                     // if onBreak === false (end of normal timer)
         this.setState({
           onBreak: true,                                      // toggle onBreak value
-          timer: 300                                          // set Timer
+          timer: this.state.breakLength                       // set Timer
+        });
+      } 
+      else {                                                // if onBreak === true (end of break timer)
+        this.setState({                                       // condition continues to be 
+          count: this.state.count + 1,
+          isActive: true
         });
       }
     }  
@@ -94,28 +100,36 @@ export default class Pomodoro extends Component {
   }
 
   render() {
-    let breakNotice = "";
-    
-    if (this.state.timer === 0 || this.state.onBreak) {
-      let noticeMsg = this.state.onBreak && this.state.timer === 0 ? "The Timer has Ended" : "Break Time"; 
+    let noticeMsg = "";
+    // let alarm = "";
 
-      breakNotice = <section className="section-notice">
-        <h3 className="section-notice-msg">{noticeMsg}</h3> 
-        <audio id="alarm">
-          <source src="analog-watch-alarm.mp3" type="audio/mpeg"></source>
-          <source src="analog-watch-alarm.wav" type="audio/wav"></source>
-          Your browser does not support the audio element
-        </audio>
-      </section>;
+    if (this.state.onBreak) {
+      if (this.state.timer > 0) {
+        noticeMsg = "Break Time";
+      } else {
+        noticeMsg = "The Timer has Ended";
+      }
+    } else {
+      noticeMsg = `Counter: ${this.state.count}`;
     }
+
+    let alarm = this.state.timer === 0 || this.state.onBreak ?
+      <audio id="alarm">
+        <source src="analog-watch-alarm.mp3" type="audio/mpeg"></source>
+        <source src="analog-watch-alarm.wav" type="audio/wav"></source>
+        Your browser does not support the audio element
+      </audio> : "";
 
     return (
       <div className="pomodoro">
         <section className="section-timer" >
           <Timer timer={ this.state.timer }/>
         </section>
-        
-        {this.state.timer === 0 || this.state.onBreak ? breakNotice : ""}
+
+        <section className="section-notice">
+          <h3 className="section-notice-msg">{noticeMsg}</h3>
+          {alarm} 
+        </section>
         
         <section className="section-controls">
           <button className="controls-button" onClick={this.startTimer}>Start</button>

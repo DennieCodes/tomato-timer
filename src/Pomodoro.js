@@ -3,16 +3,16 @@ import Timer from './Timer';
 import './Pomodoro.css';
 
 export default class Pomodoro extends Component {
+  // Note that only changing data needs to be stateful, if it doesn't change then it should be props
+  // 1. count can come from the parent
+  // 2. timerLength and breakLength are passed by the parent so don't need to be state
   constructor(props) {
     super(props);
     this.state = {
-      count: 0,
       onBreak: false,
       isActive: false,
       timerId: 0,
-      timer: this.props.timerLength,
-      timerLength: this.props.timerLength,
-      breakLength: this.props.breakLength
+      timer: this.props.timerLength || 1500,
     }
 
     this.resetTimer = this.resetTimer.bind(this);
@@ -28,7 +28,7 @@ export default class Pomodoro extends Component {
     }
 
     this.setState({
-      timer: this.state.timerLength,
+      timer: this.props.timerLength || 1500,
       isActive: false,
       onBreak: false
     });
@@ -80,14 +80,16 @@ export default class Pomodoro extends Component {
       if (this.state.onBreak === false) {                     // if onBreak === false (end of normal timer)
         this.setState({
           onBreak: true,                                      // toggle onBreak value
-          timer: this.state.breakLength                       // set Timer
+          timer: this.props.breakLength || 30                 // set Timer
         });
       } 
-      else {                                                // if onBreak === true (end of break timer)
+      else {                                                // if onBreak === true (end of break timer)       
+
         this.setState({                                       // condition continues to be 
-          count: this.state.count + 1,
+          // count: this.state.count + 1,
           isActive: true
         });
+        this.props.counter();                                 // call parent counter function        
       }
     }  
   }
@@ -110,7 +112,7 @@ export default class Pomodoro extends Component {
         noticeMsg = "The Timer has Ended";
       }
     } else {
-      noticeMsg = `Counter: ${this.state.count}`;
+      noticeMsg = `Counter: ${this.props.count}`;
     }
 
     let alarm = this.state.timer === 0 || this.state.onBreak ?
